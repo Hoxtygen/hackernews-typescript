@@ -1,5 +1,5 @@
-import { prisma } from './../context';
-import { extendType, intArg, nonNull, objectType, stringArg } from "nexus";
+// import { prisma } from './../context';
+import { extendType, nonNull, objectType, stringArg } from "nexus";
 import { NexusGenObjects } from "../../nexus-typegen";
 
 export const Link = objectType({
@@ -7,7 +7,15 @@ export const Link = objectType({
 	definition(t) {
 		t.nonNull.int("id");
 		t.nonNull.string("description");
-		t.nonNull.string("url")
+		t.nonNull.string("url");
+		t.field("postedBy", {
+			type: "User",
+			resolve(parent, args, context) {
+				return context.prisma.link
+						.findUnique({where: {id: parent.id}})
+						.postedBy();
+			}
+		})
 	}
 });
 
@@ -33,21 +41,6 @@ export const LinkQuery = extendType({
 				return context.prisma.link.findMany()
 			}
 		})
-		// t.nonNull.field("feed", {
-		// 	type: "Link",
-		// 	args: {
-		// 		id: nonNull(intArg())
-		// 	},
-		// 	resolve(parent, args, context) {
-		// 		const {id} = args
-		// 		console.log("parent:", parent)
-		// 		console.log("context:", context)
-		// 		const link = links.find(link => link.id === id)
-		// 		if (link) {
-		// 			return link
-		// 		}
-		// 	}
-		// })
 	}
 
 })
