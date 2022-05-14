@@ -12,8 +12,8 @@ export const Link = objectType({
 			type: "User",
 			resolve(parent, args, context) {
 				return context.prisma.link
-						.findUnique({where: {id: parent.id}})
-						.postedBy();
+					.findUnique({ where: { id: parent.id } })
+					.postedBy();
 			}
 		})
 	}
@@ -56,10 +56,16 @@ export const LinkMutation = extendType({
 				url: nonNull(stringArg())
 			},
 			resolve(_parent, args, context) {
+				const { description, url } = args
+				const { userId } = context
+				if (!userId) {
+					throw new Error("Cannot post withoug logging in...");
+				}
 				const newLink = context.prisma.link.create({
 					data: {
-						description: args.description,
-						url: args.url
+						description,
+						url,
+						postedBy: { connect: { id: userId } }
 					}
 				})
 				return newLink
