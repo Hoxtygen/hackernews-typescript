@@ -1,4 +1,20 @@
-import { extendType, nonNull, objectType, stringArg, intArg } from "nexus";
+import { extendType, nonNull, objectType, stringArg, intArg, inputObjectType, enumType, arg, list } from "nexus";
+import {Prisma} from "@prisma/client"
+
+export const LinkOrderByInput = inputObjectType({
+	name: "LinkOrderByInput",
+	definition(t) {
+		t.field("description", {type: Sort});
+		t.field("url", {type: Sort});
+		t.field("createdAt", {type: Sort});
+	}
+})
+
+export const Sort = enumType({
+	name: "Sort",
+	members: ["asc", "desc"]
+})
+
 
 export const Link = objectType({
 	name: "Link",
@@ -34,7 +50,8 @@ export const LinkQuery = extendType({
 			args: {
 				filter: stringArg(),
 				skip: intArg(),
-				take: intArg()
+				take: intArg(),
+				orderBy: arg({type: list(nonNull(LinkOrderByInput))})
 			},
 			resolve(_parent, args, context) {
 				const where = args.filter ? {
@@ -46,7 +63,8 @@ export const LinkQuery = extendType({
 				return context.prisma.link.findMany({
 					where,
 					skip: args?.skip as number | undefined, //There is a type mismatch between the Nexus generated type (number | undefined | null) and the type expected by Prisma (number | undefined) for these two options. For this reason, typecasting is needed.
-					take: args?.take as number | undefined	//same as skip and 
+					take: args?.take as number | undefined,	//same as skip and 
+					orderBy: args?.orderBy as Prisma.Enumerable<Prisma.LinkOrderByWithRelationInput>
 				})
 			}
 		})
