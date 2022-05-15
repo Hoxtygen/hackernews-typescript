@@ -29,7 +29,7 @@ type Mutation {
 }
 
 type Query {
-  feeds: [Link!]!
+  feeds(filter: String): [Link!]!
 }
 
 type User {
