@@ -1,6 +1,4 @@
-// import { prisma } from './../context';
-import { extendType, nonNull, objectType, stringArg } from "nexus";
-import { NexusGenObjects } from "../../nexus-typegen";
+import { extendType, nonNull, objectType, stringArg, intArg } from "nexus";
 
 export const Link = objectType({
 	name: "Link",
@@ -34,7 +32,9 @@ export const LinkQuery = extendType({
 		t.nonNull.list.nonNull.field("feeds", {
 			type: "Link",
 			args: {
-				filter: stringArg()
+				filter: stringArg(),
+				skip: intArg(),
+				take: intArg()
 			},
 			resolve(_parent, args, context) {
 				const where = args.filter ? {
@@ -45,6 +45,8 @@ export const LinkQuery = extendType({
 				} : {}
 				return context.prisma.link.findMany({
 					where,
+					skip: args?.skip as number | undefined, //There is a type mismatch between the Nexus generated type (number | undefined | null) and the type expected by Prisma (number | undefined) for these two options. For this reason, typecasting is needed.
+					take: args?.take as number | undefined	//same as skip and 
 				})
 			}
 		})
